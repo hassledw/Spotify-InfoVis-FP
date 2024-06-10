@@ -80,7 +80,7 @@ plt.bar(num_bars, genre_speech1, bottom = dance_bars1 + genre_energy1, color = '
 plt.bar(num_bars, genre_acoust1, bottom = dance_bars1 + genre_energy1 + genre_speech1, color = 'orange', label = 'Acousticness')
 plt.bar(num_bars, genre_inst1, bottom = dance_bars1 + genre_energy1 + genre_speech1 + genre_acoust1, color = 'yellow', label = 'Instrumentalness')
 plt.bar(num_bars, genre_live1, bottom = dance_bars1 + genre_energy1 + genre_speech1 + genre_acoust1 + genre_inst1, color = 'purple', label = 'Liveness')
-plt.bar(num_bars, genre_val1, bottom = dance_bars1 + genre_energy1 + genre_speech1 + genre_acoust1 + genre_inst1 + genre_live1, color = 'purple', label = 'Valence')
+plt.bar(num_bars, genre_val1, bottom = dance_bars1 + genre_energy1 + genre_speech1 + genre_acoust1 + genre_inst1 + genre_live1, color = 'pink', label = 'Valence')
 plt.xlabel('Genre', fontsize = 25)
 plt.ylabel('Attribute Mean Amounts', fontsize = 25)
 plt.title('Amount of Attributes by Genre', fontsize = 35)
@@ -113,7 +113,7 @@ ten_df = df[df['key']==10]
 ten_df_p = round((len(ten_df) / len(df)) * 100, 2)
 all_p = np.array([one_df_p, two_df_p, three_df_p, four_df_p, five_df_p, six_df_p, seven_df_p, eight_df_p, nine_df_p, ten_df_p])
 p_labels = ['Key 1', 'Key 2', 'Key 3', 'Key 4', 'Key 5', 'Key 6', 'Key 7', 'Key 8', 'Key 9', 'Key 10']
-plt.pie(all_p, labels = p_labels)
+plt.pie(all_p, labels = p_labels, autopct='%0.2f%%')
 plt.title('Keys used in Spotify Songs')
 plt.show()
 
