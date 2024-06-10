@@ -3,13 +3,23 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 
 df = pd.read_csv("./spotify.csv").dropna()
 genre = df['track_genre'].unique()
 genre_list = df['track_genre'].unique().tolist()
-df.drop(['track_id'], axis=1)
+numeric_df = df[["popularity", "duration_ms", "danceability", "energy", "loudness",
+                   "speechiness", "acousticness", "instrumentalness", "liveness",
+                   "valence", "tempo"]]
 
-# line plot (energy + dancebility means by genre)
+print("Before cleaning: ", df.shape)
+df = df.drop(['track_id'], axis=1)
+df = df.dropna()
+print("After cleaning: ", df.shape)
+
+'''
+LINE PLOT: Danceability + energy means by genre.
+'''
 means_by_genre = df.groupby('track_genre').mean(numeric_only=True)
 genre_energy = means_by_genre[['energy']]
 genre_danceability = means_by_genre[['danceability']]
@@ -26,7 +36,9 @@ plt.legend(loc = 'upper right')
 plt.grid()
 plt.show()
 
-#grouped bar plot (popularity and tempo grouped by genre)
+'''
+GROUPED BAR PLOT: popularity and tempo
+'''
 vector = np.vectorize(np.int_)
 genre_popularity = means_by_genre['popularity']
 pop_bars = vector(genre_popularity)
@@ -43,8 +55,10 @@ plt.title('Popularity and Tempo Means for each Genre', fontsize = 35)
 plt.legend()
 plt.show()
 
-# stacked/count? bar plot (features made up by danceability, energy, speechiess, acousticness, instrumentalness, liveness, and valence
-# by genre
+'''
+STACKED BAR PLOT (features made up by danceability, energy, speechiess, acousticness, instrumentalness, liveness, and valence
+by genre
+'''
 genre_danceability1 = means_by_genre['danceability']
 dance_bars1 = vector(genre_danceability1)
 genre_energy1 = means_by_genre['energy']
@@ -74,7 +88,9 @@ plt.xticks(num_bars, genre, rotation = 90, fontsize = 10)
 plt.legend(fontsize = 20)
 plt.show()
 
-# pie chart of the percentage of each key used throughout
+'''
+PIE CHART: Precentage of each key used throughout
+'''
 one_df = df[df['key']==1]
 one_df_p = round((len(one_df) / len(df)) * 100, 2)
 two_df = df[df['key']==2]
@@ -101,7 +117,9 @@ plt.pie(all_p, labels = p_labels)
 plt.title('Keys used in Spotify Songs')
 plt.show()
 
-# distribution plot on duration of songs
+'''
+DISTRIBUTION PLOT: duration on songs
+'''
 durations = df['duration_ms']
 dis = sns.displot(durations, kde=True)
 dis.figure.set_figwidth((20))
@@ -112,4 +130,93 @@ plt.xlabel('Duration')
 plt.ylabel('Count')
 plt.show()
 
-#
+
+'''
+HEATMAP (w/cbar): Depicts correlation matrix in heatmap.
+'''
+plt.figure(figsize=(10, 10))
+heatmap = sns.heatmap(numeric_df.corr(method="pearson"), vmin=-1.0,
+                      vmax=1.0, annot=True, fmt=".1f", cmap="YlGnBu", cbar=True)
+heatmap.set_title('Correlation Heatmap of Numeric Spotify Data', fontdict={'fontsize':15}, pad=14);
+plt.tight_layout()
+plt.show()
+
+'''
+HORIZONTAL BAR PLOT: top 10 mean popularity by genre
+'''
+mean_pop = df[['popularity', 'track_genre']].groupby(
+    'track_genre').mean().reset_index().sort_values(by='popularity', ascending=False).head(10)
+
+plt.figure(figsize=(12, 8))
+meanpopplot = sns.barplot(x='popularity', y='track_genre', data=mean_pop, hue="track_genre", palette="mako")
+meanpopplot.set_title('Top 10 Mean Popularity by Genre', fontdict={'fontsize':15}, pad=14)
+plt.xlabel('Mean Popularity')
+plt.ylabel('Genre')
+
+plt.tight_layout()
+plt.show()
+
+'''
+COUNT PLOT: Most represented artists by popular genres
+'''
+fig = plt.figure(figsize=(30, 15))
+
+colors = ["green", "orange", "red", "blue", "purple"]
+for i, popular_genre in enumerate(mean_pop.track_genre.unique()):
+    ax = fig.add_subplot(2, 5, i + 1)
+    counts = df[df['track_genre'] == popular_genre][['artists', 'track_genre']].groupby(
+        "track_genre").value_counts(sort=True, ascending=False).head(10).reset_index()
+
+    sns.barplot(data=counts, x="artists", y="count", color=colors[i % 5], ax=ax)
+    ax.set_title(f"Top 10 Most Represented Artists in {popular_genre}", fontdict={'fontsize':15}, pad=14)
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=90, fontsize=8)
+
+plt.suptitle("Top-10 Represented Artists Across Popular Genres", fontsize=30)
+plt.tight_layout()
+plt.show()
+
+'''
+PAIR PLOT: Showing pair plot of correlated features
+'''
+fig = plt.figure(figsize = (10,10))
+features = ["popularity", "energy", "loudness", "acousticness", "track_genre"]
+top10_pop = df[[feature for feature in features]].groupby(
+    'track_genre').mean().reset_index().sort_values(by='popularity', ascending=False).head(10)
+print(top10_pop)
+
+top10_pop_with_songs = pd.DataFrame()
+for genre in top10_pop.track_genre.unique():
+    top10_pop_with_songs = pd.concat((
+        df[df['track_genre'] == genre], top10_pop_with_songs
+    ))
+
+pairplot = sns.pairplot(
+    top10_pop_with_songs[["energy", "loudness", "acousticness", "track_genre"]],
+    palette="husl",
+    hue="track_genre")
+
+# pairplot.fig.suptitle('Pair plot on Energy, Loudness, and Acousticness', y=0.95)
+plt.show()
+
+'''
+QQ PLOT: Statistical Distribution Evaluation on All Numeric Features.
+'''
+fig = plt.figure(figsize = (20, 20))
+
+dist_types = ["norm", "beta", "expon", "lognorm"]
+count = 1
+for feature in numeric_df[["duration_ms", "danceability", "valence"]].columns:
+    for i, dist in enumerate(dist_types):
+        ax = fig.add_subplot(3, 4, count)
+        params = ()
+        if dist == "beta":
+            params = (2, 5)
+        elif dist == "expon":
+            params = ()
+        elif dist == "lognorm":
+            params = (0.95)
+        stats.probplot(numeric_df[feature], dist=dist, sparams=params, plot=plt)
+        ax.set_title(f"{feature} on {dist} plot", fontsize=15)
+        count += 1
+plt.suptitle("Distribution Evaluation on Duration, Danceability, Valence", fontsize=30)
+plt.show()

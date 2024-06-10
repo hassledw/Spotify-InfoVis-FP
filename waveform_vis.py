@@ -33,7 +33,7 @@ def plot_song_waveform(song : Song) -> None:
 
 if __name__ == "__main__":
     spotify_creds = ConnectSpotifyItem()
-    song = Song(spotify_creds.token, songname="Summertime")
+    song = Song(spotify_creds.token, songname="My heart will go on")
     song.display_song_data()
     audio_data = song.get_audio_analysis()
     plot_song_waveform(song)
