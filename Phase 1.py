@@ -1,6 +1,7 @@
 # phase 1 graphs
 import pandas as pd
 import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 df = pd.read_csv("./spotify.csv").dropna()
@@ -99,3 +100,16 @@ p_labels = ['Key 1', 'Key 2', 'Key 3', 'Key 4', 'Key 5', 'Key 6', 'Key 7', 'Key 
 plt.pie(all_p, labels = p_labels)
 plt.title('Keys used in Spotify Songs')
 plt.show()
+
+# distribution plot on duration of songs
+durations = df['duration_ms']
+dis = sns.displot(durations, kde=True)
+dis.figure.set_figwidth((20))
+dis.figure.set_figheight((10))
+plt.xlim(0, 0.8*10**6)
+plt.title('Duration Distribution')
+plt.xlabel('Duration')
+plt.ylabel('Count')
+plt.show()
+
+#
