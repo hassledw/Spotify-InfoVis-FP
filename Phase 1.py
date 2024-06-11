@@ -57,7 +57,7 @@ plt.legend()
 plt.show()
 
 '''
-STACKED BAR PLOT (features made up by danceability, energy, speechiess, acousticness, instrumentalness, liveness, and valence
+STACKED BAR PLOT (features made up by danceability, energy, speechiness, acousticness, instrumentalness, liveness, and valence
 by genre
 '''
 genre_danceability1 = means_by_genre['danceability']
@@ -90,7 +90,7 @@ plt.legend(fontsize = 20)
 plt.show()
 
 '''
-PIE CHART: Precentage of each key used throughout
+PIE CHART: Percentage of each key used throughout
 '''
 zero_df = df[df['key']==0]
 zero_df_p = round((len(zero_df) / len(df)) * 100, 2)
@@ -134,7 +134,6 @@ plt.title('Duration Distribution')
 plt.xlabel('Duration')
 plt.ylabel('Count')
 plt.show()
-
 
 '''
 HEATMAP (w/cbar): Depicts correlation matrix in heatmap.
@@ -229,7 +228,6 @@ plt.show()
 '''
 3D PLOT + Contour: STFT of Don't Stop Believin'
 '''
-
 # get the amplitude->time domain signal and sampling rate of song.
 songdata, sr = librosa.load("./DontStopBelievinJourney.mp3")
 
@@ -277,4 +275,25 @@ ax4.contour(T, A, F, levels=timeamp.levels, cmap='coolwarm')
 ax4.set_xlabel('Time')
 ax4.set_ylabel('Amplitude')
 plt.tight_layout()
+plt.show()
+
+#%%
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
+df = pd.read_csv("./spotify.csv").dropna()
+df = df.dropna()
+'''
+Cluster Map: explore relationships between features
+'''
+# data
+features1 = ['popularity', 'energy', 'danceability', 'liveness']
+top10_energy = df[[feature for feature in features1]].groupby(
+    'energy').mean().reset_index().sort_values(by='popularity', ascending=False).head(10)
+# map
+cluster = sns.clustermap(top10_energy, metric='correlation', standard_scale = 1,
+                         cmap='viridis', figsize=(10, 10))
+cluster.fig.subplots_adjust(right=0.7)
+cluster.ax_cbar.set_position((0.8, .2, .03, .4))
+cluster.fig.suptitle('Cluster Map of Spotify Data', fontsize=25)
 plt.show()
