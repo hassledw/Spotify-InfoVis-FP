@@ -4,6 +4,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import librosa
 
 df = pd.read_csv("./spotify.csv").dropna()
 genre = df['track_genre'].unique()
@@ -219,4 +220,57 @@ for feature in numeric_df[["duration_ms", "danceability", "valence"]].columns:
         ax.set_title(f"{feature} on {dist} plot", fontsize=15)
         count += 1
 plt.suptitle("Distribution Evaluation on Duration, Danceability, Valence", fontsize=30)
+plt.show()
+
+'''
+3D PLOT + Contour: STFT of Don't Stop Believin'
+'''
+
+# get the amplitude->time domain signal and sampling rate of song.
+songdata, sr = librosa.load("./DontStopBelievinJourney.mp3")
+
+# create the STFT from the song to convert songdata from amp->time to freq->time.
+stft = librosa.stft(songdata)
+
+# converts the STFT amplitude to amplitude in DB, as humans hear loudness in log-scale.
+# sets ref=np.max to make the max value referenced as 0.
+A = librosa.amplitude_to_db(np.abs(stft), ref=np.max)
+
+# creates a time array the same size as amp and freq.
+times = librosa.times_like(A, sr=sr)
+
+# generates the frequency values corresponding to the rows of the STFT
+frequencies = librosa.fft_frequencies(sr=sr)
+
+T, F = np.meshgrid(times, frequencies)
+
+fig = plt.figure(figsize=(10, 10))
+grid = fig.add_gridspec(2, 3, height_ratios=[3, 1])
+ax = fig.add_subplot(grid[0, :], projection='3d')
+ax.set_title("3D Spectrogram of \"Don\'t Stop Believin'\" - Journey", fontsize=20, family='serif')
+ax.set_xlabel('Time')
+ax.set_ylabel('Frequency')
+ax.set_zlabel('Amplitude')
+ax.set_zlim(-100, 0)
+
+ax.plot_surface(T, F, A, cmap='viridis', edgecolor='none', alpha=0.9, linewidth=0.5)
+twod = ax.contour(T, F, A, zdir='z', offset=-100, cmap='coolwarm', alpha=0.5)
+freqamp = ax.contour(T, F, A, zdir='x', offset=-40, cmap='coolwarm', alpha=0.5)
+timeamp = ax.contour(T, F, A, zdir='y', offset=12000, cmap='coolwarm', alpha=0.5)
+
+ax2 = fig.add_subplot(grid[1, 0])
+ax2.contour(T, F, A, levels=twod.levels, cmap='coolwarm')
+ax2.set_xlabel('Time')
+ax2.set_ylabel('Frequency')
+
+ax3 = fig.add_subplot(grid[1, 1])
+ax3.contour(F, A, T, levels=freqamp.levels, cmap='coolwarm')
+ax3.set_xlabel('Frequency')
+ax3.set_ylabel('Amplitude')
+
+ax4 = fig.add_subplot(grid[1, 2])
+ax4.contour(T, A, F, levels=timeamp.levels, cmap='coolwarm')
+ax4.set_xlabel('Time')
+ax4.set_ylabel('Amplitude')
+plt.tight_layout()
 plt.show()
