@@ -92,6 +92,8 @@ plt.show()
 '''
 PIE CHART: Precentage of each key used throughout
 '''
+zero_df = df[df['key']==0]
+zero_df_p = round((len(zero_df) / len(df)) * 100, 2)
 one_df = df[df['key']==1]
 one_df_p = round((len(one_df) / len(df)) * 100, 2)
 two_df = df[df['key']==2]
@@ -112,8 +114,10 @@ nine_df = df[df['key']==9]
 nine_df_p = round((len(nine_df) / len(df)) * 100, 2)
 ten_df = df[df['key']==10]
 ten_df_p = round((len(ten_df) / len(df)) * 100, 2)
-all_p = np.array([one_df_p, two_df_p, three_df_p, four_df_p, five_df_p, six_df_p, seven_df_p, eight_df_p, nine_df_p, ten_df_p])
-p_labels = ['Key 1', 'Key 2', 'Key 3', 'Key 4', 'Key 5', 'Key 6', 'Key 7', 'Key 8', 'Key 9', 'Key 10']
+eleven_df = df[df['key']==11]
+eleven_df_p = round((len(eleven_df) / len(df)) * 100, 2)
+all_p = np.array([zero_df_p, one_df_p, two_df_p, three_df_p, four_df_p, five_df_p, six_df_p, seven_df_p, eight_df_p, nine_df_p, ten_df_p, eleven_df_p])
+p_labels = ['Key 0', 'Key 1', 'Key 2', 'Key 3', 'Key 4', 'Key 5', 'Key 6', 'Key 7', 'Key 8', 'Key 9', 'Key 10', 'Key 11']
 plt.pie(all_p, labels = p_labels, autopct='%0.2f%%')
 plt.title('Keys used in Spotify Songs')
 plt.show()
