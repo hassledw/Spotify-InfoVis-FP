@@ -1,2 +1,4 @@
 spotipy
 dash
+librosa
+scipy

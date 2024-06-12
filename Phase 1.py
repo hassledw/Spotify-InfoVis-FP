@@ -186,7 +186,6 @@ fig = plt.figure(figsize = (10,10))
 features = ["popularity", "energy", "loudness", "acousticness", "track_genre"]
 top10_pop = df[[feature for feature in features]].groupby(
     'track_genre').mean().reset_index().sort_values(by='popularity', ascending=False).head(10)
-print(top10_pop)
 
 top10_pop_with_songs = pd.DataFrame()
 for genre in top10_pop.track_genre.unique():
@@ -229,7 +228,7 @@ plt.show()
 3D PLOT + Contour: STFT of Don't Stop Believin'
 '''
 # get the amplitude->time domain signal and sampling rate of song.
-songdata, sr = librosa.load("./DontStopBelievinJourney.mp3")
+songdata, sr = librosa.load("songs/DontStopBelievinJourney.mp3")
 
 # create the STFT from the song to convert songdata from amp->time to freq->time.
 stft = librosa.stft(songdata)
@@ -277,12 +276,6 @@ ax4.set_ylabel('Amplitude')
 plt.tight_layout()
 plt.show()
 
-#%%
-import seaborn as sns
-import pandas as pd
-import matplotlib.pyplot as plt
-df = pd.read_csv("./spotify.csv").dropna()
-df = df.dropna()
 '''
 Cluster Map: explore relationships between features
 '''
@@ -296,4 +289,45 @@ cluster = sns.clustermap(top10_energy, metric='correlation', standard_scale = 1,
 cluster.fig.subplots_adjust(right=0.7)
 cluster.ax_cbar.set_position((0.8, .2, .03, .4))
 cluster.fig.suptitle('Cluster Map of Spotify Data', fontsize=25)
+plt.show()
+
+'''
+AREA PLOT: Tempo vs Valence
+'''
+areadf = df[["artists", "track_name",
+             "valence", "tempo", "energy", "danceability"]].copy()
+
+tempo_speed_categories = [0, 90, 140, 160, 200]
+tempo_speed_names = ["Slow", "Relaxed", "Medium", "Fast", "Extra Fast"]
+name_count = 0
+
+# init all TempoCategory values to None.
+areadf.loc[:, 'TempoCategory'] = "None"
+
+for i in range(0, len(tempo_speed_categories)):
+    begin_tempo = tempo_speed_categories[i]
+    end_tempo = None
+    tempo_cond = None
+
+    if i == len(tempo_speed_categories) - 1:
+        tempo_cond = (areadf["tempo"] >= begin_tempo)
+    else:
+        end_tempo = tempo_speed_categories[i + 1]
+        tempo_cond = (areadf["tempo"] >= begin_tempo) & (areadf["tempo"] <= end_tempo)
+
+    areadf.loc[tempo_cond, 'TempoCategory'] = tempo_speed_names[name_count]
+    name_count+=1
+
+areadf["TempoCategory"] = pd.Categorical(areadf["TempoCategory"], categories=tempo_speed_names, ordered=True)
+areadf = areadf.groupby("TempoCategory").agg(
+    {"valence": "mean", "energy": "mean", "danceability": "mean"}).sort_values(by="TempoCategory")
+
+#print(areadf.head())
+
+fig = plt.figure(figsize=(10, 10))
+ax = fig.add_subplot(1, 1, 1)
+areadf.plot(kind='area', alpha=0.5, color=["purple", "blue", "red"], ax=ax)
+ax.set_title("Average Valence, Energy, and Danceability by Tempo Categories")
+ax.set_xlabel("Tempo Category")
+ax.set_ylabel("Average Value")
 plt.show()
