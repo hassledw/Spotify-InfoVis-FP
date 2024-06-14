@@ -331,3 +331,68 @@ ax.set_title("Average Valence, Energy, and Danceability by Tempo Categories")
 ax.set_xlabel("Tempo Category")
 ax.set_ylabel("Average Value")
 plt.show()
+
+
+'''
+Hexbin Plot: Energy vs Liveness
+'''
+sns.jointplot(df, x="energy", y="liveness", kind="hex", color="green")
+plt.suptitle("Energy vs Liveness on all Songs")
+plt.show()
+
+'''
+Strip Plot: Showing Explicit values in hip-hop Genre
+'''
+# hip hop genre
+hiphopdf = df[df["track_genre"] == "hip-hop"]
+
+# top 10 most represented artists in hip-hop genre
+sortedhipdf = hiphopdf["artists"].value_counts().head(10).reset_index()
+
+# get all songs by the top 10 artists
+hiphopresdf = pd.DataFrame(columns=hiphopdf.columns.tolist())
+
+for artist in sortedhipdf['artists']:
+    hiphopresdf = pd.concat([hiphopresdf, hiphopdf[hiphopdf["artists"] == artist]])
+
+# print(hiphopresdf.shape)
+# print(hiphopresdf.head())
+
+fig = plt.figure(figsize=(10, 8))
+sns.stripplot(data=hiphopresdf, x="energy", y="artists", hue="explicit")
+plt.suptitle("Explicit distribution on Hip-hop Genre")
+plt.show()
+
+'''
+Swarm Plot: Different Modes and Valence on Grunge genre
+'''
+fig = plt.figure(figsize=(10, 8))
+grungedf = df[df["track_genre"] == "grunge"].copy()
+grungedf["mode"] = pd.Categorical.from_codes(grungedf['mode'], ['Minor', 'Major'])
+
+custom_palette = {
+    "Minor": "salmon",
+    "Major": "lightgreen"
+}
+sns.swarmplot(data=grungedf, x="mode", y="valence", hue="mode", palette=custom_palette, legend=True)
+
+plt.suptitle("Different Modes vs Valence on Grunge Genre", fontsize=20)
+plt.show()
+
+'''
+Violin Plot: Genre vs Danceability on top 10 most represented genres.
+'''
+fig = plt.figure(figsize=(10, 10))
+
+# get top 10 most represented genres
+top10repgenres = df["track_genre"].value_counts().head(10).reset_index()
+
+# populate a dataframe for these genres.
+violindf = pd.DataFrame(columns=df.columns.tolist())
+
+for genre in top10repgenres["track_genre"]:
+    violindf = pd.concat([violindf, df[df["track_genre"] == genre]])
+
+sns.violinplot(violindf, x="danceability", y="track_genre", hue="track_genre", palette="viridis")
+plt.suptitle("Danceability Distribution on Top-10 Selected Genres", fontsize=20)
+plt.show()
