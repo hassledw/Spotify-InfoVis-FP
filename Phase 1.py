@@ -92,34 +92,54 @@ plt.show()
 '''
 PIE CHART: Percentage of each key used throughout
 '''
-zero_df = df[df['key']==0]
-zero_df_p = round((len(zero_df) / len(df)) * 100, 2)
-one_df = df[df['key']==1]
-one_df_p = round((len(one_df) / len(df)) * 100, 2)
-two_df = df[df['key']==2]
-two_df_p = round((len(two_df) / len(df)) * 100, 2)
-three_df = df[df['key']==3]
-three_df_p = round((len(three_df) / len(df)) * 100, 2)
-four_df = df[df['key']==4]
-four_df_p = round((len(four_df) / len(df)) * 100, 2)
-five_df = df[df['key']==5]
-five_df_p = round((len(five_df) / len(df)) * 100, 2)
-six_df = df[df['key']==6]
-six_df_p = round((len(six_df) / len(df)) * 100, 2)
-seven_df = df[df['key']==7]
-seven_df_p = round((len(seven_df) / len(df)) * 100, 2)
-eight_df = df[df['key']==8]
-eight_df_p = round((len(eight_df) / len(df)) * 100, 2)
-nine_df = df[df['key']==9]
-nine_df_p = round((len(nine_df) / len(df)) * 100, 2)
-ten_df = df[df['key']==10]
-ten_df_p = round((len(ten_df) / len(df)) * 100, 2)
-eleven_df = df[df['key']==11]
-eleven_df_p = round((len(eleven_df) / len(df)) * 100, 2)
-all_p = np.array([zero_df_p, one_df_p, two_df_p, three_df_p, four_df_p, five_df_p, six_df_p, seven_df_p, eight_df_p, nine_df_p, ten_df_p, eleven_df_p])
-p_labels = ['Key 0', 'Key 1', 'Key 2', 'Key 3', 'Key 4', 'Key 5', 'Key 6', 'Key 7', 'Key 8', 'Key 9', 'Key 10', 'Key 11']
-plt.pie(all_p, labels = p_labels, autopct='%0.2f%%')
-plt.title('Keys used in Spotify Songs')
+# zero_df = df[df['key']==0]
+# zero_df_p = round((len(zero_df) / len(df)) * 100, 2)
+# one_df = df[df['key']==1]
+# one_df_p = round((len(one_df) / len(df)) * 100, 2)
+# two_df = df[df['key']==2]
+# two_df_p = round((len(two_df) / len(df)) * 100, 2)
+# three_df = df[df['key']==3]
+# three_df_p = round((len(three_df) / len(df)) * 100, 2)
+# four_df = df[df['key']==4]
+# four_df_p = round((len(four_df) / len(df)) * 100, 2)
+# five_df = df[df['key']==5]
+# five_df_p = round((len(five_df) / len(df)) * 100, 2)
+# six_df = df[df['key']==6]
+# six_df_p = round((len(six_df) / len(df)) * 100, 2)
+# seven_df = df[df['key']==7]
+# seven_df_p = round((len(seven_df) / len(df)) * 100, 2)
+# eight_df = df[df['key']==8]
+# eight_df_p = round((len(eight_df) / len(df)) * 100, 2)
+# nine_df = df[df['key']==9]
+# nine_df_p = round((len(nine_df) / len(df)) * 100, 2)
+# ten_df = df[df['key']==10]
+# ten_df_p = round((len(ten_df) / len(df)) * 100, 2)
+# eleven_df = df[df['key']==11]
+# eleven_df_p = round((len(eleven_df) / len(df)) * 100, 2)
+# all_p = np.array([zero_df_p, one_df_p, two_df_p, three_df_p, four_df_p, five_df_p, six_df_p, seven_df_p, eight_df_p, nine_df_p, ten_df_p, eleven_df_p])
+
+piedf = df["key"].value_counts().sort_index()
+p_labels = ['Key C', 'Key C#/Db', 'Key D', 'Key D#/Eb', 'Key E', 'Key F', 'Key F#/Gb', 'Key G', 'Key G#/Ab', 'Key A', 'Key A#/Bb', 'Key B']
+
+explode = [0.2 if value == piedf.min() or value == piedf.max() else 0 for value in piedf]
+
+fig = plt.figure(figsize=(15,12))
+grid = fig.add_gridspec(2, 3, height_ratios=[2.25, 1])
+ax = fig.add_subplot(grid[0, :])
+
+ax.pie(piedf, labels = p_labels, autopct='%0.2f%%', explode=explode,
+        colors=sns.color_palette('viridis'))
+
+genre_list = ["pop", "hip-hop", "country"]
+for i in range(len(genre_list)):
+    ax = fig.add_subplot(grid[1, i])
+    genrepiedf = df[df["track_genre"] == genre_list[i]]["key"].value_counts().sort_index()
+    explode = [0.2 if value == genrepiedf.min() or value == genrepiedf.max() else 0 for value in genrepiedf]
+    ax.set_title(f"{genre_list[i].capitalize()} Genre")
+    ax.pie(genrepiedf, labels = p_labels, autopct='%0.1f%%', explode=explode,
+        colors=sns.color_palette('viridis'))
+
+plt.suptitle('Keys used in Spotify Songs', fontsize=20)
 plt.show()
 
 '''
@@ -441,4 +461,43 @@ fig = plt.figure(figsize=(10, 20))
 joint = sns.jointplot(data=df, x="tempo", y="danceability", hue="time_signature", kind="kde")
 joint.fig.suptitle('tempo and danceability for each time signature')
 joint.fig.subplots_adjust(top=0.9)
+plt.show()
+
+'''
+Reg Plot + Regression: Popularity vs X on pop genre data
+'''
+fig = plt.figure(figsize=(10, 10))
+columns = ["loudness", "mode", "tempo", "danceability"]
+
+colors = ["#c7ff87", "#ff1493", "#7289da", "#ff8f38"]
+
+for i, entry in enumerate(columns):
+    ax = fig.add_subplot(2, 2, i+1)
+    x = "energy"
+
+    if entry == "mode":
+        sns.regplot(df[df["track_genre"] == "pop"],
+                    x=x,
+                    y=entry,
+                    logistic=True,
+                    line_kws=dict(color="r"),
+                    color=colors[i])
+    elif entry == "danceability" or entry == "tempo":
+        sns.regplot(df[df["track_genre"] == "pop"],
+                    x=x,
+                    y=entry,
+                    order=2,
+                    line_kws=dict(color="r"),
+                    color=colors[i])
+    else:
+        sns.regplot(df[df["track_genre"] == "pop"],
+                    x=x,
+                    y=entry,
+                    line_kws=dict(color="r"),
+                    color=colors[i])
+
+    ax.set_title(f"{x} vs {entry}")
+    ax.grid()
+
+plt.suptitle(f"Different Features on Energy in Pop Genre", fontsize=20)
 plt.show()

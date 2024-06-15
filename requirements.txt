@@ -2,3 +2,4 @@ spotipy
 dash
 librosa
 scipy
+statsmodels
