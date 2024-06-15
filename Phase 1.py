@@ -433,3 +433,12 @@ Boxen Plot: tempo distribution
 ax = sns.boxenplot(x=df["tempo"])
 ax.set_title('Tempo distribution')
 plt.show()
+
+'''
+Joint Plot w KDE: tempo and danceability for each time signature
+'''
+fig = plt.figure(figsize=(10, 20))
+joint = sns.jointplot(data=df, x="tempo", y="danceability", hue="time_signature", kind="kde")
+joint.fig.suptitle('tempo and danceability for each time signature')
+joint.fig.subplots_adjust(top=0.9)
+plt.show()
