@@ -396,3 +396,20 @@ for genre in top10repgenres["track_genre"]:
 sns.violinplot(violindf, x="danceability", y="track_genre", hue="track_genre", palette="viridis")
 plt.suptitle("Danceability Distribution on Top-10 Selected Genres", fontsize=20)
 plt.show()
+
+#%%
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+'''
+KDE Plot: Energy density in each time signature
+'''
+df = pd.read_csv("./spotify.csv").dropna()
+
+sns.kdeplot(
+   data=df, x="energy", hue="time_signature",
+   fill=True, common_norm=False, palette="crest",
+   alpha=0.6, linewidth=0)
+plt.title("Energy density in each time signature")
+plt.show()
