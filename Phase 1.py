@@ -397,19 +397,33 @@ sns.violinplot(violindf, x="danceability", y="track_genre", hue="track_genre", p
 plt.suptitle("Danceability Distribution on Top-10 Selected Genres", fontsize=20)
 plt.show()
 
-#%%
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
 '''
 KDE Plot: Energy density in each time signature
 '''
-df = pd.read_csv("./spotify.csv").dropna()
-
 sns.kdeplot(
    data=df, x="energy", hue="time_signature",
    fill=True, common_norm=False, palette="crest",
    alpha=0.6, linewidth=0)
 plt.title("Energy density in each time signature")
+plt.show()
+
+
+'''
+Rug Plot: scatter plot and rug plots for the top 10 genre liveness, loudness, energy, and valence features
+'''
+# data
+new_features = ["popularity", "energy", "loudness", "acousticness", 'speechiness', 'liveness', 'valence', 'time_signature', "track_genre"]
+new_top10_pop = df[[feature for feature in new_features]].groupby(
+   'track_genre').mean().reset_index().sort_values(by='popularity', ascending=False).head(10)
+# plots
+fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(10, 10))
+fig.suptitle('scatter plot and rug plots for the top 10 genre features')
+sns.scatterplot(ax=axes[0, 0], data=new_top10_pop, x="popularity", y="liveness", hue="track_genre")
+sns.rugplot(ax=axes[0, 0], data=new_top10_pop, x="popularity", y="liveness", hue="track_genre", height=.05)
+sns.scatterplot(ax=axes[0, 1], data=new_top10_pop, x="popularity", y="loudness", hue="track_genre")
+sns.rugplot(ax=axes[0, 1], data=new_top10_pop, x="popularity", y="loudness", hue="track_genre", height=.05)
+sns.scatterplot(ax=axes[1, 0], data=new_top10_pop, x="popularity", y="energy", hue="track_genre")
+sns.rugplot(ax=axes[1, 0], data=new_top10_pop, x="popularity", y="energy", hue="track_genre", height=.05)
+sns.scatterplot(ax=axes[1, 1], data=new_top10_pop, x="popularity", y="valence", hue="track_genre")
+sns.rugplot(ax=axes[1, 1], data=new_top10_pop, x="popularity", y="valence", hue="track_genre", height=.05)
 plt.show()
