@@ -407,7 +407,6 @@ sns.kdeplot(
 plt.title("Energy density in each time signature")
 plt.show()
 
-
 '''
 Rug Plot: scatter plot and rug plots for the top 10 genre liveness, loudness, energy, and valence features
 '''
@@ -426,4 +425,11 @@ sns.scatterplot(ax=axes[1, 0], data=new_top10_pop, x="popularity", y="energy", h
 sns.rugplot(ax=axes[1, 0], data=new_top10_pop, x="popularity", y="energy", hue="track_genre", height=.05)
 sns.scatterplot(ax=axes[1, 1], data=new_top10_pop, x="popularity", y="valence", hue="track_genre")
 sns.rugplot(ax=axes[1, 1], data=new_top10_pop, x="popularity", y="valence", hue="track_genre", height=.05)
+plt.show()
+
+'''
+Boxen Plot: tempo distribution
+'''
+ax = sns.boxenplot(x=df["tempo"])
+ax.set_title('Tempo distribution')
 plt.show()
