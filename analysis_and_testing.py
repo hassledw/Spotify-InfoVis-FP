@@ -9,17 +9,8 @@ from scipy import stats
 ### DATASET PROCESSING ###
 old_df = pd.read_csv("./spotify.csv")
 nan_values = old_df.isnull().sum()
-#print(old_df)
 
 df = pd.read_csv("./spotify.csv").dropna().drop(['Unnamed: 0'], axis=1)
-#print(df.head(5))
-
-X = StandardScaler().fit_transform(df.select_dtypes(include=np.number))
-# singular values and condition number for og
-#singular_values = np.linalg.svd(X)
-#cond_num = round(np.linalg.cond(X), 2)
-#print(f'singular values of original dim: {singular_values}')
-#print(f'conditional number of original dim: {cond_num}')
 
 ### OUTLIER DETECTION & REMOVAL SECTION ###
 fig = plt.figure(figsize = (10,10))
@@ -64,6 +55,8 @@ print(no_outliers)
 
 #%%
 ### PCA ###
+X = StandardScaler().fit_transform(no_outliers.select_dtypes(include=np.number))
+
 pca = PCA(n_components='mle', svd_solver='full')
 pca.fit(X)
 X_pca = pca.transform(X)
@@ -73,5 +66,9 @@ print('Transformed Feature Space:', X_pca.shape)
 new_df = pd.DataFrame(data = X_pca)
 print(' ')
 print(f'Transformed dataset:')
-print(new_df.head())
+print(new_df)
 
+new_singular_values = np.linalg.svd(X_pca)
+new_cond_num = round(np.linalg.cond(X_pca), 2)
+print(f'singular values of reduced dim: {new_singular_values}')
+print(f'conditional number of reduced dim: {new_cond_num}')
