@@ -35,21 +35,34 @@ class Song:
         self.results = self.spotify.search(self.songname, 1, 0, "track")
 
         self.artist = self.results["tracks"]["items"][0]["artists"][0]["name"]
+        self.songname = self.results["tracks"]["items"][0]["name"]
         self.album = self.results["tracks"]["items"][0]["album"]["name"]
         self.album_image_link = self.results["tracks"]["items"][0]["album"]["images"][0]["url"]
         self.track_url = self.results["tracks"]["items"][0]["external_urls"]["spotify"]
         self.track_id = self.results["tracks"]["items"][0]["id"]
 
-    def display_song_data(self) -> None:
+    def display_song_data(self) -> str:
         '''
         Display song data attributes such as artist, album, ... track_url.
         :return: None
         '''
         print("Artist:\t ", self.artist)
+        print("Track:\t ", self.songname)
         print("Album:\t ", self.album)
         print("Album Image Link:\t ", self.album_image_link)
         print("Track ID: \t ", self.track_id)
         print("Track Link:\t ", self.track_url)
+
+        info = f"""
+        Artist:\t {self.artist}
+        Track:\t {self.songname}
+        Album:\t {self.album}
+        Album Image Link:{self.album_image_link}
+        Track ID:\t {self.track_id}
+        Track Link:\t {self.track_url}
+        """
+
+        return info
 
     def play_song(self) -> None:
         '''
@@ -78,4 +91,3 @@ class Song:
 #     song.display_song_data()
 #     audio_data = song.get_audio_analysis()
 #     print(audio_data)
-# cats test

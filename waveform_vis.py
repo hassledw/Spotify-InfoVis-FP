@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
+import pandas as pd
 from spotify_utils import ConnectSpotifyItem, Song
 import numpy as np
-import librosa
+import plotly.express as px
 
 def loudness_to_amplitude(loudness):
     '''
@@ -11,7 +11,7 @@ def loudness_to_amplitude(loudness):
     :return: amplitude
     '''
     return np.power(10, np.divide(loudness, 20))
-def plot_song_waveform(song : Song) -> None:
+def plot_song_waveform(song : Song, audio_data):
     '''
     Extracts the segments form the song and other data like loudness
     to compute and visualize the waveform (time domain).
@@ -24,16 +24,33 @@ def plot_song_waveform(song : Song) -> None:
     times = np.array([segment['start'] for segment in segments])
     amplitude = loudness_to_amplitude(loudness)
 
-    plt.figure(figsize=(15, 6))
-    plt.plot(times, amplitude)
-    plt.title(f'Waveform of {song.songname} by {song.artist}')
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Amplitude')
-    plt.show()
+    df = pd.DataFrame({'time': times, 'amplitude': amplitude})
+
+    fig = px.line(df,
+                  x='time',
+                  y='amplitude',
+                  title=f'Waveform of \"{song.songname}\" by {song.artist}')
+
+    fig.update_layout(
+        title_font_color="red",
+        title_font_size=30,
+        title={'y': .95, 'x': 0.5},
+        font_size=20,
+        xaxis_title="Time",
+        xaxis_title_font_color="green",
+        yaxis_title="Amplitude (dB)",
+        yaxis_title_font_color="green",
+    )
+
+    fig.update_traces(
+        line=dict(width=2)
+    )
+
+    return fig
 
 if __name__ == "__main__":
     spotify_creds = ConnectSpotifyItem()
     song = Song(spotify_creds.token, songname="My heart will go on")
     song.display_song_data()
     audio_data = song.get_audio_analysis()
-    plot_song_waveform(song)
+    plot_song_waveform(song, audio_data)

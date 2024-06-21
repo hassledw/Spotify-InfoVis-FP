@@ -1,7 +1,8 @@
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
 import pandas as pd
-
+from spotify_utils import ConnectSpotifyItem, Song
+from waveform_vis import plot_song_waveform
 ###################################
 #    Data Creation and Selection  #
 ###################################
@@ -23,6 +24,12 @@ for genre in pie_genres:
     genre_pie_df = df[df["track_genre"] == genre].value_counts('key', sort=True)
     genre_pie_df = pd.DataFrame(genre_pie_df).rename(columns={"count" : genre})
     all_pie_df = pd.concat([all_pie_df, genre_pie_df], axis=1).sort_index()
+
+###########################
+#     Spotify API init    #
+###########################
+spotify_creds = ConnectSpotifyItem()
+song = Song(spotify_creds.token, songname="My heart will go on")
 
 ########################
 #       App Layout     #
@@ -79,6 +86,27 @@ pi_genre_dropdown = dcc.Dropdown(all_pie_df.columns,
                  multi=False,
                  clearable=False)
 
+song_text_area = dcc.Textarea(
+    id="song-text-area",
+    placeholder="Enter Song Name",
+    value="Simple Man",
+    className="text-center",
+    style={"height": "15%", "width": "100%"}
+)
+
+song_loading = dcc.Loading(
+    id="loading-1",
+    type="default",
+    children=html.Div(id="loading-output-1")
+)
+
+song_box = html.Div([
+                        html.Img(id="album-image", src="", height="15%", width="15%", style={"padding-left": "5%"}),
+                        html.Plaintext(id="song-info", children=[""])
+                    ], style={"display": "flex", "align-items": "center", "width": "45%", "border": "solid", "border-radius": "2%"})
+
+waveform_graph = dcc.Graph(id="waveform-plot")
+
 app.layout = html.Div(children=[
     # graph 1: scatter
     dcc.Tabs([
@@ -113,10 +141,22 @@ app.layout = html.Div(children=[
             ]),
         ]),
 
-        dcc.Tab(label="Waveform Analysis", children=[
+        dcc.Tab(label="Song Analysis", children=[
             html.Div([
                 html.Br(),
-                html.H1(children='Spotify Dataset Waveform Visualization')
+                html.H1(children='Song Visualization'),
+                html.Div([
+                    html.Div([
+                        html.Header(children=[html.H5('Type out a Song Name')]),
+                        song_text_area,
+                        song_loading
+                    ], style={"display": "block", "width": "40%"}),
+                    song_box
+                ], style={"display": "flex", "gap": "10%", "align-items": "center"}),
+
+                html.Div([
+                    waveform_graph
+                ], style={"width": "50%", "display": "inline-block", "position": "relative"})
             ])
         ])
     ])
@@ -194,6 +234,22 @@ def modify_chart(genre : str):
 
     return piechart
 
+@app.callback(
+    [Output("waveform-plot", "figure"),
+    Output("album-image", "src"),
+    Output("song-info", "children"),
+    Output("loading-output-1", "children")],
+    [Input("song-text-area", "value")]
+)
+def plot_waveform(songname : str):
+    song = Song(spotify_creds.token, songname=songname)
+    song.display_song_data()
+    audio_data = song.get_audio_analysis()
+    fig = plot_song_waveform(song, audio_data)
+    image = song.album_image_link
+    songinfo = song.display_song_data()
+
+    return fig, image, songinfo, ""
 
 if __name__ == "__main__":
     app.run_server(debug=True)
