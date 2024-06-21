@@ -4,6 +4,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy import stats
 
 ### DATASET PROCESSING ###
 old_df = pd.read_csv("./spotify.csv")
@@ -54,7 +55,14 @@ sns.boxplot(ax=axes[2, 2], data=top10_pop_with_songs, x='track_genre', y='valenc
 plt.show()
 
 ### REMOVE OUTLIERS ###
+no_outliers = df[(np.abs(stats.zscore(df.select_dtypes(include=np.number))) < 3).all(axis=1)]
+print('Original Dataset w/ Outliers:')
+print(df)
+print(' ')
+print('New Dataset w/o Outliers:')
+print(no_outliers)
 
+#%%
 ### PCA ###
 pca = PCA(n_components='mle', svd_solver='full')
 pca.fit(X)
