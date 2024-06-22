@@ -32,18 +32,18 @@ def plot_song_waveform(song : Song, audio_data):
                   title=f'Waveform of \"{song.songname}\" by {song.artist}')
 
     fig.update_layout(
-        title_font_color="red",
-        title_font_size=30,
+        title_font_color="blue",
+        title_font_size=25,
         title={'y': .95, 'x': 0.5},
         font_size=20,
         xaxis_title="Time",
-        xaxis_title_font_color="green",
+        xaxis_title_font_color="black",
         yaxis_title="Amplitude (dB)",
-        yaxis_title_font_color="green",
+        yaxis_title_font_color="black",
     )
 
     fig.update_traces(
-        line=dict(width=2)
+        line=dict(color="darkgreen", width=2)
     )
 
     return fig

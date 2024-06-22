@@ -34,12 +34,14 @@ class Song:
         self.spotify = spotipy.Spotify(auth=self.token)
         self.results = self.spotify.search(self.songname, 1, 0, "track")
 
-        self.artist = self.results["tracks"]["items"][0]["artists"][0]["name"]
-        self.songname = self.results["tracks"]["items"][0]["name"]
-        self.album = self.results["tracks"]["items"][0]["album"]["name"]
-        self.album_image_link = self.results["tracks"]["items"][0]["album"]["images"][0]["url"]
-        self.track_url = self.results["tracks"]["items"][0]["external_urls"]["spotify"]
-        self.track_id = self.results["tracks"]["items"][0]["id"]
+        self.track = self.results["tracks"]["items"][0]
+
+        self.artist = self.track["artists"][0]["name"]
+        self.songname = self.track["name"]
+        self.album = self.track["album"]["name"]
+        self.album_image_link = self.track["album"]["images"][0]["url"]
+        self.track_url = self.track["external_urls"]["spotify"]
+        self.track_id = self.track["id"]
 
     def display_song_data(self) -> str:
         '''
@@ -85,9 +87,43 @@ class Song:
         data = response.json()
         return data
 
+    def create_dataset_entry(self) -> dict:
+        '''
+        Creates a Song entry for our Spotify dataset. This will allow
+        us to add more data to our dataset if needed.
+
+        :return: a dictionary of all the values.
+        '''
+        track_audio_features = self.spotify.audio_features(self.track_id)[0]
+
+        return {
+            "track_id": self.track_id,
+            "artists": self.artist,
+            "album_name": self.album,
+            "track_name": self.songname,
+            "explicit": self.track["explicit"],
+            "popularity": self.track["popularity"],
+            "key": track_audio_features["key"],
+            "mode": track_audio_features["mode"],
+            "time_signature": track_audio_features["time_signature"],
+            "duration_ms": track_audio_features["duration_ms"],
+            "danceability": track_audio_features["danceability"],
+            "energy": track_audio_features["energy"],
+            "loudness": track_audio_features["loudness"],
+            "speechiness": track_audio_features["speechiness"],
+            "acousticness": track_audio_features["acousticness"],
+            "instrumentalness": track_audio_features["instrumentalness"],
+            "liveness": track_audio_features["liveness"],
+            "valence": track_audio_features["valence"],
+            "tempo": track_audio_features["tempo"]
+        }
+
+
 # if __name__ == "__main__":
 #     spotify_creds = ConnectSpotifyItem()
 #     song = Song(spotify_creds.token, "My Immortal")
 #     song.display_song_data()
-#     audio_data = song.get_audio_analysis()
-#     print(audio_data)
+#     # audio_data = song.get_audio_analysis()
+#     dataset_entry = song.create_dataset_entry()
+#
+#     print(dataset_entry)

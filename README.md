@@ -18,3 +18,8 @@ medium with interactive plots.
 ## Dataset
 For our dataset, we have decided to visualize a Kaggle.com hosted dataset called Spotify Tracks, 
 consisting of 114,000 songs with 20 unique features (9 categorical and 11 numeric).
+
+## How to Run
+1. To run our dashboard locally, navigate to the `main.py` file and click "run" in the PyCharm IDE.
+2. To run our Phase 1 static plot code, navigate to `Phase 1.py` file and click "run" in the PyCharm IDE.
+3. To run outlier detection and PCA analysis, navigate to `analysis_and_testing.py` and click "run" in the PyCharm IDE.
