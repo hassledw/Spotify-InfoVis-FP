@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
 from scipy import stats
 
@@ -46,22 +47,25 @@ df = pd.read_csv("./spotify.csv").dropna().drop(['Unnamed: 0'], axis=1)
 # plt.show()
 
 ### REMOVE OUTLIERS ###
-no_outliers = df[(np.abs(stats.zscore(df.select_dtypes(include=np.number))) < 3).all(axis=1)]
+numeric_df = df[["popularity", "duration_ms", "danceability", "energy", "loudness",
+                   "speechiness", "acousticness", "instrumentalness", "liveness",
+                   "valence", "tempo"]]
+no_outliers = numeric_df[(np.abs(stats.zscore(numeric_df)) < 3).all(axis=1)]
 print('Original Dataset w/ Outliers:')
 print(df)
 print(' ')
 print('New Dataset w/o Outliers:')
 print(no_outliers)
 
-#%%
 ### PCA ###
-X = StandardScaler().fit_transform(no_outliers.select_dtypes(include=np.number))
+X = StandardScaler().fit_transform(no_outliers)
 
 pca = PCA(n_components='mle', svd_solver='full')
 pca.fit(X)
 X_pca = pca.transform(X)
 print('Original Feature Space:', X.shape)
 print('Transformed Feature Space:', X_pca.shape)
+print('Explained variance ratio:', (pca.explained_variance_ratio_.cumsum().round(2)))
 
 new_df = pd.DataFrame(data = X_pca)
 print(' ')
@@ -73,13 +77,36 @@ new_cond_num = pca.singular_values_[0] / pca.singular_values_[-1]
 print(f'singular values of reduced dim: {new_singular_values}')
 print(f'conditional number of reduced dim: {new_cond_num:.2f}')
 
+### CUMULATIVE EXPLAINED VARIANCE PLOT ###
 plt.plot(np.arange(1, len(np.cumsum(pca.explained_variance_ratio_))+1, 1),
          np.cumsum(pca.explained_variance_ratio_ * 100))
-plt.axhline(y=95, color="red", linestyle="--", linewidth=2)
-plt.axvline(x=11.5, color="black", linestyle="--", linewidth=2)
+plt.axhline(y=99, color="red", linestyle="--", linewidth=2)
+plt.axvline(x=10, color="black", linestyle="--", linewidth=2)
 plt.xticks(np.arange(1, len(np.cumsum(pca.explained_variance_ratio_))+1, 1))
 plt.grid()
 plt.title("Cumulative Explained Variance on Number of Components", fontdict={'fontsize':15})
 plt.xlabel("number of components")
 plt.ylabel("cumulative explained variance")
+plt.show()
+
+### HISTOGRAM ###
+fig = plt.figure(figsize = (20, 20))
+dist_types = ["norm"]
+count = 1
+for feature in no_outliers.columns:
+    for i, dist in enumerate(dist_types):
+        ax = fig.add_subplot(3, 4, count)
+        params = ()
+        stats.probplot(no_outliers[feature], dist=dist, sparams=params, plot=plt)
+        ax.set_title(f"{feature} on {dist} plot", fontsize=15)
+        count += 1
+plt.suptitle("Distribution Evaluation for Numerical Features", fontsize=30)
+plt.show()
+
+### HEATMAP & CORRELATION MATRIX ###
+plt.figure(figsize=(10, 10))
+heatmap = sns.heatmap(no_outliers.corr(method="pearson"), vmin=-1.0,
+                      vmax=1.0, annot=True, fmt=".1f", cmap="YlGnBu", cbar=True)
+heatmap.set_title('Correlation Heatmap of Spotify Data w/o Outliers', fontdict={'fontsize':15}, pad=14);
+plt.tight_layout()
 plt.show()
