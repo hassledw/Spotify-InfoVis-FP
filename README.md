@@ -19,7 +19,16 @@ medium with interactive plots.
 For our dataset, we have decided to visualize a Kaggle.com hosted dataset called Spotify Tracks, 
 consisting of 114,000 songs with 20 unique features (9 categorical and 11 numeric).
 
+## Access our Dashboard
+Our dashboard is hosted by GCP on link: 
+
+Steps taken to deploy dashboard:
+```
+docker build -f Dockerfile -t gcr.io/infovis-427015/spotify-dashboard:test .
+docker push gcr.io/infovis-427015/spotify-dashboard:test
+gcloud run deploy spotify-dashboard --image gcr.io/infovis-427015/spotify-dashboard:test
+```
 ## How to Run
-1. To run our dashboard locally, navigate to the `main.py` file and click "run" in the PyCharm IDE.
+1. To run our dashboard locally, navigate to the `dev-app.py` file and click "run" in the PyCharm IDE.
 2. To run our Phase 1 static plot code, navigate to `Phase 1.py` file and click "run" in the PyCharm IDE.
 3. To run outlier detection and PCA analysis, navigate to `analysis_and_testing.py` and click "run" in the PyCharm IDE.
