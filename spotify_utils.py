@@ -59,7 +59,6 @@ class Song:
         Artist:\t {self.artist}
         Track:\t {self.songname}
         Album:\t {self.album}
-        Album Image Link:{self.album_image_link}
         Track ID:\t {self.track_id}
         Track Link:\t {self.track_url}
         """
