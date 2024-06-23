@@ -501,3 +501,19 @@ for i, entry in enumerate(columns):
 
 plt.suptitle(f"Different Features on Energy in Pop Genre", fontsize=20)
 plt.show()
+
+'''
+Histogram Plot + Regression: Popularity vs X on pop genre data
+'''
+minor = df[df["mode"] == 0 ]
+p_labels = ['Key C', 'Key C#/Db', 'Key D', 'Key D#/Eb', 'Key E', 'Key F', 'Key F#/Gb', 'Key G', 'Key G#/Ab',
+            'Key A', 'Key A#/Bb', 'Key B']
+
+key_amount = 12
+fig = plt.figure(figsize=(8, 10))
+h = sns.histplot(minor['key'], bins=range(key_amount+1), kde=True)
+h.set_title("Key Distribution for Minor Mode")
+h.set_xticks(ticks=np.arange(12), labels=p_labels, rotation=25)
+h.set_xlabel('Key')
+h.set_ylabel('Count')
+plt.show()
