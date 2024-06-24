@@ -28,6 +28,11 @@ docker build -f Dockerfile -t gcr.io/infovis-427015/spotify-dashboard:test .
 docker push gcr.io/infovis-427015/spotify-dashboard:test
 gcloud run deploy spotify-dashboard --image gcr.io/infovis-427015/spotify-dashboard:test
 ```
+
+To delete service:
+```
+gcloud service
+```
 ## How to Run
 1. To run our dashboard locally, navigate to the `dev-app.py` file and click "run" in the PyCharm IDE.
 2. To run our Phase 1 static plot code, navigate to `Phase 1.py` file and click "run" in the PyCharm IDE.

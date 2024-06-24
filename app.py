@@ -2,7 +2,7 @@ from dash import Dash, dcc, html, Input, Output, exceptions
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from spotify_utils import ConnectSpotifyItem, Song
+from spotify_utils import ConnectSpotifyItem, Song, get_access_token
 from waveform_vis import plot_song_waveform
 
 ###################################
@@ -26,8 +26,6 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash("Spotify Visualization", external_stylesheets=external_stylesheets, title="Spotify Visualization")
 p_labels = ['Key C', 'Key C#/Db', 'Key D', 'Key D#/Eb', 'Key E', 'Key F', 'Key F#/Gb', 'Key G', 'Key G#/Ab',
             'Key A', 'Key A#/Bb', 'Key B']
-
-server = app.server
 # pie data
 
 all_pie_df = pd.DataFrame()
@@ -36,12 +34,6 @@ for genre in df["track_genre"].unique().tolist():
     genre_pie_df = df[df["track_genre"] == genre].value_counts('key', sort=True)
     genre_pie_df = pd.DataFrame(genre_pie_df).rename(columns={"count" : genre})
     all_pie_df = pd.concat([all_pie_df, genre_pie_df], axis=1).sort_index()
-
-###########################
-#     Spotify API init    #
-###########################
-# spotify_creds = ConnectSpotifyItem()
-# song = Song(spotify_creds.token, songname="My heart will go on")
 
 ########################
 #       App Layout     #
@@ -328,8 +320,7 @@ def modify_chart(genre : str):
 )
 def plot_waveform(songname : str):
     global saved_song
-    spotify_creds = ConnectSpotifyItem()
-    song = Song(spotify_creds.token, songname=songname)
+    song = Song(get_access_token(), songname=songname)
     saved_song = song
     # song.display_song_data()
     audio_data = song.get_audio_analysis()
@@ -354,8 +345,7 @@ def download_csv(songname : str, click : int):
         raise exceptions.PreventUpdate
 
     else:
-        spotify_creds = ConnectSpotifyItem()
-        song = Song(spotify_creds.token, songname=songname)
+        song = Song(get_access_token(), songname=songname)
         song_data_dict = song.create_dataset_entry()
         song_df = pd.DataFrame(song_data_dict, index=[0])
         click_counter = click
@@ -366,7 +356,6 @@ def download_csv(songname : str, click : int):
     [Input("play-button", "n_clicks")]
 )
 def play_song(n_clicks : int):
-    spotify_creds = ConnectSpotifyItem()
     saved_song.play_song()
 
 @app.callback(
@@ -456,8 +445,4 @@ def update_histogram_plot(value : int):
 
     return fig
 if __name__ == "__main__":
-    app.run_server(
-        debug=True,
-        port=8080,
-        host='0.0.0.0'
-    )
+    app.run_server(debug=True)

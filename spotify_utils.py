@@ -3,11 +3,16 @@ from dataclasses import dataclass, field
 import requests
 import spotipy
 import webbrowser
+import requests
+import base64
+
 
 @dataclass
 class ConnectSpotifyItem:
     '''
     Automatically sets the details of the connection to the Spotify API.
+
+    Used with USER PREFERNCES.
     '''
     username: str = field(default="koaladan43")
     client_id: str = field(default="a063191c16264c52ae9c31d237cd1206")
@@ -17,6 +22,31 @@ class ConnectSpotifyItem:
         self.oauth_object = spotipy.SpotifyOAuth(self.client_id, self.client_secret, self.redirect_uri)
         self.token_dict = self.oauth_object.get_access_token()
         self.token = self.token_dict['access_token']
+
+def get_access_token():
+    '''
+    Gets the access token from the Spotify API, NO USER ID.
+    Source: https://developer.spotify.com/documentation/spotify/api/v1/
+    :return: access token as a string.
+    '''
+    client_id = "a063191c16264c52ae9c31d237cd1206"
+    client_secret = "2a81399b653f4fd891b1d29da740f08c"
+    client_base64 = base64.b64encode(f"{client_id}:{client_secret}".encode())
+
+    url = "https://accounts.spotify.com/api/token"
+    data = {
+        "grant_type": "client_credentials"
+    }
+    headers = {
+        "Authorization": f"Basic {client_base64.decode()}"
+    }
+
+    request = requests.post(url, data=data, headers=headers)
+    response_data = request.json()
+
+    token = response_data['access_token']
+
+    return token
 
 class Song:
     '''
@@ -118,11 +148,18 @@ class Song:
         }
 
 
-# if __name__ == "__main__":
-#     spotify_creds = ConnectSpotifyItem()
-#     song = Song(spotify_creds.token, "My Immortal")
-#     song.display_song_data()
-#     # audio_data = song.get_audio_analysis()
-#     dataset_entry = song.create_dataset_entry()
-#
-#     print(dataset_entry)
+if __name__ == "__main__":
+    #     spotify_creds = ConnectSpotifyItem()
+
+    r = requests.post(token_url, data=token_data, headers=token_headers)
+    token_response_data = r.json()
+
+    access_token = token_response_data['access_token']
+
+    print("Access Token:", access_token)
+    song = Song(access_token, "My Immortal")
+    song.display_song_data()
+    # audio_data = song.get_audio_analysis()
+    dataset_entry = song.create_dataset_entry()
+
+    print(dataset_entry)
