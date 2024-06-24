@@ -21,11 +21,14 @@ areaplot_columns = ["danceability", "energy", "speechiness", "acousticness", "in
 
 categories = df['track_genre'].unique().tolist()
 genre_artists = df[df['track_genre'] == categories[0]]["artists"].unique().tolist()
-
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = Dash("Spotify Visualization", external_stylesheets=external_stylesheets, title="Spotify Visualization")
 p_labels = ['Key C', 'Key C#/Db', 'Key D', 'Key D#/Eb', 'Key E', 'Key F', 'Key F#/Gb', 'Key G', 'Key G#/Ab',
             'Key A', 'Key A#/Bb', 'Key B']
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = Dash("Spotify Visualization", external_stylesheets=external_stylesheets, title="Spotify Visualization")
+server = app.server
+
 # pie data
 
 all_pie_df = pd.DataFrame()
@@ -445,4 +448,4 @@ def update_histogram_plot(value : int):
 
     return fig
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8080)
